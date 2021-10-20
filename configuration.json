@@ -1,0 +1,51 @@
+[
+  {
+    "key": "user",
+    "type": "input",
+    "defaultValue": "",
+    "templateOptions": {
+      "label": "Username",
+      "required": true
+    }
+  },
+  {
+    "key": "pass",
+    "type": "input",
+    "defaultValue": "",
+    "templateOptions": {
+      "type": "password",
+	"label": "Password",
+      "required": true
+    }
+  },
+  {
+    "key": "tenant",
+    "type": "input",
+    "defaultValue": "",
+    "templateOptions": {
+      "label": "Tenant",
+      "description": "Name of the SWP url: https://<tenant>.swp.nl",
+      "required": true
+    }
+  },
+  {
+    "key": "library",
+    "type": "input",
+    "defaultValue": "",
+    "templateOptions": {
+      "label": "Library",
+      "description": "Name of the library",
+      "required": true
+        }
+    },
+    {
+    "key": "function",
+    "type": "input",
+    "defaultValue": "",
+    "templateOptions": {
+      "label": "Function",
+      "description": "Name of the function to execute",
+      "required": true
+    }
+  }
+]
