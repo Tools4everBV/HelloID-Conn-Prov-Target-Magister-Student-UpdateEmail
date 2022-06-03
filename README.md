@@ -52,7 +52,7 @@ The following settings are required to connect to the API.
 
 
 ### Remarks
-  - Execute on-premises
+  - Execute on-premises because of IP whitelisting on Magister site
   - The user must be authorized for the function 
   - Documentation can be found at https://<tenant>.swp.nl:8800/doc?, https://<tenant>.nl:8800/doc?#Service_ADFuncties, https://<tenant>.swp.nl:8800/doc?#Service_Data 
  
