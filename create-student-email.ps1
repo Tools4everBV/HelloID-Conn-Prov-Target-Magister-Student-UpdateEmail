@@ -5,9 +5,9 @@ $magisterBaseUri = "";
 $pass = $c.pass;
 $tenant = $c.tenant
 #$magisterFunction = "UpdateLeerEMail";
-$magisterFunction=c.function;
+$magisterFunction=$c.function;
 #$magisterLibrary = "ADFuncties";
-$magisterLibrary = "$c.library;
+$magisterLibrary = $c.library;
 $magisterUsername = $c.user;
 $magisterPassword = $pass;
 
