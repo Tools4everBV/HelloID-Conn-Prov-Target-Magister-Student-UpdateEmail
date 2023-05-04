@@ -1,6 +1,6 @@
 [
   {
-    "key": "user",
+    "key": "Username",
     "type": "input",
     "defaultValue": "",
     "templateOptions": {
@@ -9,43 +9,52 @@
     }
   },
   {
-    "key": "pass",
+    "key": "Password",
     "type": "input",
     "defaultValue": "",
     "templateOptions": {
+      "label": "Password",
       "type": "password",
-	"label": "Password",
       "required": true
     }
   },
   {
-    "key": "tenant",
+    "key": "BaseUrl",
     "type": "input",
-    "defaultValue": "",
+    "defaultValue": "https://<tenant>.swp.nl:8800",
     "templateOptions": {
-      "label": "Tenant",
-      "description": "Name of the SWP url: https://<tenant>.swp.nl",
+      "label": "BaseUrl",
       "required": true
     }
   },
   {
-    "key": "library",
+    "key": "Library",
     "type": "input",
     "defaultValue": "",
     "templateOptions": {
       "label": "Library",
       "description": "Name of the library",
       "required": true
-        }
-    },
-    {
-    "key": "function",
+    }
+  },
+  {
+    "key": "Function",
     "type": "input",
     "defaultValue": "",
     "templateOptions": {
       "label": "Function",
       "description": "Name of the function to execute",
       "required": true
+    }
+  },
+  {
+    "key": "isDebug",
+    "type": "checkbox",
+    "defaultValue": false,
+    "templateOptions": {
+      "label": "Toggle debug logging",
+      "description": "When toggled, debug logging will be displayed",
+      "required": false
     }
   }
 ]
