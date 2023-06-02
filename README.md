@@ -6,6 +6,10 @@
 
 <br />
 
+<p align="center">
+  <img src="https://www.tools4ever.nl/connector-logos/magister-logo.png">
+</p>
+
 ## Table of contents
 
 - [Introduction](#Introduction)
