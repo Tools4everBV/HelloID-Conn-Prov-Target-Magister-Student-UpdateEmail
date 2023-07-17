@@ -1,102 +1,173 @@
-#Config
+#####################################################
+# HelloID-Conn-Prov-Target-Magister-Create-Student-Email
+#
+# Version: 2.0.0
+#####################################################
+
+# Initialize default values
 $c = $configuration | ConvertFrom-Json
-$user = $c.user;
-$magisterBaseUri = "";
-$pass = $c.pass;
-$tenant = $c.tenant
-#$magisterFunction = "UpdateLeerEMail";
-$magisterFunction=$c.function;
-#$magisterLibrary = "ADFuncties";
-$magisterLibrary = $c.library;
-$magisterUsername = $c.user;
-$magisterPassword = $pass;
+$p = $person | ConvertFrom-Json
+$success = $false
+$auditLogs = [System.Collections.Generic.List[PSCustomObject]]::new()
 
+# Set TLS to accept TLS, TLS 1.1 and TLS 1.2
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls -bor [Net.SecurityProtocolType]::Tls11 -bor [Net.SecurityProtocolType]::Tls12
 
-#Enable TLS 1.2
-if ([Net.ServicePointManager]::SecurityProtocol -notmatch "Tls12") {
-    [Net.ServicePointManager]::SecurityProtocol += [Net.SecurityProtocolType]::Tls12
+# Set debug logging
+switch ($($c.isDebug)) {
+    $true { $VerbosePreference = 'Continue' }
+    $false { $VerbosePreference = 'SilentlyContinue' }
 }
+$InformationPreference = "Continue"
+$WarningPreference = "Continue"
 
-#Initialize default properties
-$p = $person | ConvertFrom-Json;
-$stamNr = $p.ExternalId;
-$aRef = $p.ExternalId;
-$success = $False;
-$auditMessage = "";
+$magisterFunction = $c.Function;
+$magisterLibrary = $c.Library;
+$magisterUsername = $c.Username;
+$magisterPassword = $c.Password;
+$magisterBaseUri = $c.BaseUrl;
 
-#Read UPN from AD, change to the correct source
-$userPrincipalName = $p.Accounts.MicrosoftActiveDirectoryLeerlingen.userPrincipalName;
-
-#Change Magister Base URI based on location code
-$locationCode = $p.PrimaryContract.Location.Code;
-$magisterBaseUri = "https://$tenant.swp.nl:8800";
-
-if ($magisterBaseUri -eq "nvt"  ) {
-    $auditMessage = "User is not in Magister, skipping update..."
-    $success = $False;
-
-    #build up result
-    $result = [PSCustomObject]@{
-        Success          = $success;
-        AccountReference = $aRef;
-        AuditDetails     = $auditMessage;
-        Account          = $account;
-    };
-
-    Write-Output $result | ConvertTo-Json -Depth 10;
-    exit
-}
-
-#Create account object
+#Change mapping here
 $account = [PSCustomObject]@{
-    'ref'   = $p.ExternalId
-    'email' = $userPrincipalName
-    'locationCode' = $locationCode
+    StamNr       = $p.ExternalId;
+    emailAddress = $p.Accounts.MicrosoftActiveDirectory.userPrincipalName;
 }
 
-if ([String]::IsNullOrEmpty($userPrincipalName)  ) {
-    $auditMessage = "AD UPN empty, skipping update..."
-    $success = $False;
+#region functions
+function Resolve-HTTPError {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory,
+            ValueFromPipeline
+        )]
+        [object]$ErrorObject
+    )
+    process {
+        $httpErrorObj = [PSCustomObject]@{
+            FullyQualifiedErrorId = $ErrorObject.FullyQualifiedErrorId
+            MyCommand             = $ErrorObject.InvocationInfo.MyCommand
+            RequestUri            = $ErrorObject.TargetObject.RequestUri
+            ScriptStackTrace      = $ErrorObject.ScriptStackTrace
+            ErrorMessage          = ''
+        }
 
-    #build up result
-    $result = [PSCustomObject]@{
-        Success          = $success;
-        AccountReference = $aRef;
-        AuditDetails     = $auditMessage;
-        Account          = $account;
-    };
+        if ($ErrorObject.Exception.GetType().FullName -eq 'Microsoft.PowerShell.Commands.HttpResponseException') {
+            # $httpErrorObj.ErrorMessage = $ErrorObject.ErrorDetails.Message # Does not show the correct error message for the Raet IAM API calls
+            $httpErrorObj.ErrorMessage = $ErrorObject.Exception.Message
 
-    Write-Output $result | ConvertTo-Json -Depth 10;
-    exit
+        }
+        elseif ($ErrorObject.Exception.GetType().FullName -eq 'System.Net.WebException') {
+            $httpErrorObj.ErrorMessage = [System.IO.StreamReader]::new($ErrorObject.Exception.Response.GetResponseStream()).ReadToEnd()
+        }
+
+        Write-Output $httpErrorObj
+    }
 }
 
-# Compose update uri
-$uri = "$magisterBaseUri/doc?Function=$magisterFunction&Library=$magisterLibrary&SessionToken=$magisterUsername%3B$magisterPassword&StamNr=$stamNr&EMail=$userPrincipalName";
+function Get-ErrorMessage {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory,
+            ValueFromPipeline
+        )]
+        [object]$ErrorObject
+    )
+    process {
+        $errorMessage = [PSCustomObject]@{
+            VerboseErrorMessage = $null
+            AuditErrorMessage   = $null
+        }
 
-Write-Verbose $uri -Verbose
+        if ( $($ErrorObject.Exception.GetType().FullName -eq 'Microsoft.PowerShell.Commands.HttpResponseException') -or $($ErrorObject.Exception.GetType().FullName -eq 'System.Net.WebException')) {
+            $httpErrorObject = Resolve-HTTPError -Error $ErrorObject
+
+            $errorMessage.VerboseErrorMessage = $httpErrorObject.ErrorMessage
+
+            $errorMessage.AuditErrorMessage = $httpErrorObject.ErrorMessage
+        }
+
+        # If error message empty, fall back on $ex.Exception.Message
+        if ([String]::IsNullOrEmpty($errorMessage.VerboseErrorMessage)) {
+            $errorMessage.VerboseErrorMessage = $ErrorObject.Exception.Message
+        }
+        if ([String]::IsNullOrEmpty($errorMessage.AuditErrorMessage)) {
+            $errorMessage.AuditErrorMessage = $ErrorObject.Exception.Message
+        }
+
+        Write-Output $errorMessage
+    }
+}
+#endregion functions
 
 try {
+
+    # Check if required fields are available for correlation
+    $incompleteCorrelationValues = $false
+    if ([String]::IsNullOrEmpty($($account.emailAddress))) {
+        $incompleteCorrelationValues = $true
+        Write-Warning "UPN cannot be empty"
+    }
+         
+    if ($incompleteCorrelationValues -eq $true) {
+        throw "UPN cannot be empty"
+    }
+   
+    $uri = "$magisterBaseUri/doc?Function=$magisterFunction&Library=$magisterLibrary&SessionToken=$magisterUsername%3B$magisterPassword&StamNr=$($account.StamNr)&EMail=$($account.emailAddress)";
+    Write-Verbose $uri
+
     if (-Not($dryRun -eq $True)) {
         $response = Invoke-WebRequest -Method POST -Uri $uri -UseBasicParsing
         if ($response.statuscode -eq "200") {
             $success = $True;
-            $auditMessage = "Email address updated";
-        } else {
+            $auditLogs.Add([PSCustomObject]@{
+                    Message = "Successfully updated magister student stamNr: [$($account.StamNr)] UPN: [$($account.emailAddress)]"
+                    IsError = $false
+                })
+        }
+        else {
             $success = $False;
-            $auditMessage = "Update failed: $reponse";
+            $auditLogs.Add([PSCustomObject]@{
+                    Message = "Error updating magister student stamNr: [$($account.StamNr)] UPN: [$($account.emailAddress)]"
+                    IsError = $true
+                })
         }
     }
+    else {
+        Write-Warning "Dryrun should update stamNr: [$($account.StamNr)] with UPN: [$($account.emailAddress)]"
+    }    
 }
-catch {
-    $errResponse = $_;
-    $auditMessage = "Update failed: ${errResponse}";
-}
-#build up result
-$result = [PSCustomObject]@{
-    Success          = $success;
-    AccountReference = $aRef;
-    AuditDetails     = $auditMessage;
-    Account          = $account;
-};
+Catch {
+    $ex = $PSItem
+    $errorMessage = Get-ErrorMessage -ErrorObject $ex
 
-Write-Output $result | ConvertTo-Json -Depth 10;
+    Write-Verbose "Error at Line '$($ex.InvocationInfo.ScriptLineNumber)': $($ex.InvocationInfo.Line). Error: $($($errorMessage.VerboseErrorMessage))"
+
+    $auditLogs.Add([PSCustomObject]@{
+            Message = "Error updating emailadress. Error Message: $($errorMessage.AuditErrorMessage)"
+            IsError = $true
+        })     
+}
+
+finally {
+    # Check if auditLogs contains errors, if no errors are found, set success to true
+    if (-NOT($auditLogs.IsError -contains $true)) {
+        $success = $true
+    }
+
+    # Send results
+    $result = [PSCustomObject]@{
+        Success          = $success
+        AccountReference = $aRef
+        AuditLogs        = $auditLogs
+        PreviousAccount  = $previousAccount
+        Account          = $account
+
+        # Optionally return data for use in other systems
+        ExportData       = [PSCustomObject]@{
+            StamNr       = $account.StamNr;
+            emailAddress = $account.emailAddress;
+        }
+    }
+
+    Write-Output ($result | ConvertTo-Json -Depth 10)  
+}
