@@ -21,16 +21,16 @@ switch ($($c.isDebug)) {
 $InformationPreference = "Continue"
 $WarningPreference = "Continue"
 
-$magisterFunction = $c.Function;
-$magisterLibrary = $c.Library;
-$magisterUsername = $c.Username;
-$magisterPassword = $c.Password;
-$magisterBaseUri = $c.BaseUrl;
+$magisterFunction = $c.Function
+$magisterLibrary = $c.Library
+$magisterUsername = $c.Username
+$magisterPassword = $c.Password
+$magisterBaseUri = $c.BaseUrl
 
 #Change mapping here
 $account = [PSCustomObject]@{
-    StamNr       = $p.ExternalId;
-    emailAddress = $p.Accounts.MicrosoftActiveDirectory.userPrincipalName;
+    StamNr       = $p.ExternalId
+    emailAddress = $p.Accounts.MicrosoftActiveDirectory.userPrincipalName
 }
 
 #region functions
@@ -118,6 +118,7 @@ try {
     if (-Not($dryRun -eq $True)) {
         $response = Invoke-WebRequest -Method POST -Uri $uri -UseBasicParsing
         if ($response.statuscode -eq "200") {
+            $aRef = $account.StamNr
             $success = $True;
             $auditLogs.Add([PSCustomObject]@{
                     Message = "Successfully updated magister student stamNr: [$($account.StamNr)] UPN: [$($account.emailAddress)]"
