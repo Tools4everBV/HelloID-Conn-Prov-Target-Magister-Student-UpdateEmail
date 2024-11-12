@@ -26,35 +26,5 @@
       "label": "BaseUrl",
       "required": true
     }
-  },
-  {
-    "key": "Library",
-    "type": "input",
-    "defaultValue": "",
-    "templateOptions": {
-      "label": "Library",
-      "description": "Name of the library",
-      "required": true
-    }
-  },
-  {
-    "key": "Function",
-    "type": "input",
-    "defaultValue": "",
-    "templateOptions": {
-      "label": "Function",
-      "description": "Name of the function to execute",
-      "required": true
-    }
-  },
-  {
-    "key": "isDebug",
-    "type": "checkbox",
-    "defaultValue": false,
-    "templateOptions": {
-      "label": "Toggle debug logging",
-      "description": "When toggled, debug logging will be displayed",
-      "required": false
-    }
   }
 ]
