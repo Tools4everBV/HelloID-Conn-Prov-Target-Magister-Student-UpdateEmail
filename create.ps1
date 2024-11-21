@@ -53,35 +53,34 @@ try {
     # process
 
     if ($null -ne $actionContext.Data.StudentEmailAddress) {
-        $uri = "$magisterBaseUri/doc?Function=UpdateLeerEMail&Library=ADFuncties&SessionToken=$($actionContext.Configuration.UserName)%3B$($actionContext.Configuration.Password)&StamNr=$($actionContext.Data.StamNr)&EMail=$($ActionContext.Data.StudentEmailAddress)"
+        $uri = "$($actionContext.Configuration.BaseUrl)/doc?Function=UpdateLeerEMail&Library=ADFuncties&SessionToken=$($actionContext.Configuration.UserName)%3B$($actionContext.Configuration.Password)&StamNr=$($actionContext.Data.StamNr)&EMail=$($ActionContext.Data.StudentEmailAddress)"
         $splatCreateParams = @{
             Uri             = $uri
             Method          = 'POST'
             UseBasicParsing = $true
         }
-
+        
         if (-not($actionContext.DryRun -eq $true)) {
             Write-Information 'Creating Student Email address'
-            $response = Invoke-RestMethod @splatCreateParams
+            $response = Invoke-WebRequest @splatCreateParams
+            
             if ($response.statuscode -ne "200") {
                 throw "Error $($response.statuscode) when creating student email address $($ActionContext.Data.StudentEmailAddress)"
             }
         }
         else {
-            Write-Information '[DryRun] setting Student Email address to $($ActionContext.Data.StudentEmailAddress), will be executed during enforcement'
+            Write-Information "[DryRun] setting Student Email address to $($ActionContext.Data.StudentEmailAddress), will be executed during enforcement"
         }
     }
 
     $auditLogMessage = "Create student email address for account was successful. AccountReference is: [$($outputContext.AccountReference)]"
     $outputContext.success = $true
     $outputContext.AuditLogs.Add([PSCustomObject]@{
-            Action  = $action
+            Action  = "CreateAccount"
             Message = $auditLogMessage
             IsError = $false
         })
-    break
 }
-
 catch {
     $outputContext.success = $false
     $ex = $PSItem

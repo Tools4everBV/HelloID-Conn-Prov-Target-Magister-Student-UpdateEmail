@@ -59,12 +59,11 @@ try {
         $action = 'NoChanges'
     }
 
-
     # Process
     switch ($action) {
         'UpdateAccount' {
             if ($null -ne $actionContext.Data.StudentEmailAddress) {
-                $uri = "$magisterBaseUri/doc?Function=UpdateLeerEMail&Library=ADFuncties&SessionToken=$($actionContext.Configuration.UserName)%3B$($actionContext.Configuration.Password)&StamNr=$($actionContext.Data.StamNr)&EMail=$($ActionContext.Data.StudentEmailAddress)"
+                $uri = "$($actionContext.Configuration.BaseUrl)/doc?Function=UpdateLeerEMail&Library=ADFuncties&SessionToken=$($actionContext.Configuration.UserName)%3B$($actionContext.Configuration.Password)&StamNr=$($actionContext.Data.StamNr)&EMail=$($ActionContext.Data.StudentEmailAddress)"
                 $splatCreateParams = @{
                     Uri             = $uri
                     Method          = 'POST'
@@ -73,20 +72,20 @@ try {
 
                 if (-not($actionContext.DryRun -eq $true)) {
                     Write-Information 'Update Student Email address'
-                    $response = Invoke-RestMethod @splatCreateParams
+                    $response = Invoke-WebRequest @splatCreateParams
                     if ($response.statuscode -ne "200") {
                         throw "Error $($response.statuscode) when updating Student email address to $($ActionContext.Data.StudentEmailAddress)"
                     }
                 }
                 else {
-                    Write-Information '[DryRun] updating Student email address to $($ActionContext.Data.StudentEmailAddress), will be executed during enforcement'
+                    Write-Information "[DryRun] updating Student email address to $($ActionContext.Data.StudentEmailAddress), will be executed during enforcement"
                 }
             }
 
             $auditLogMessage = "Update account was successful. AccountReference is: [$($outputContext.AccountReference)]"
             $outputContext.success = $true
             $outputContext.AuditLogs.Add([PSCustomObject]@{
-                    Action  = $action
+                    Action  = "UpdateAccount"
                     Message = $auditLogMessage
                     IsError = $false
                 })
