@@ -3,9 +3,6 @@
 > [!IMPORTANT]
 > This repository contains the connector and configuration code only. The implementer is responsible to acquire the connection details such as username, password, certificate, etc. You might even need to sign a contract or agreement with the supplier before implementing this connector. Please contact the client's application manager to coordinate the connector requirements.
 
-> [!WARNING]
-  This connector is not tested with a Magister environment!
-
 <p align="center">
  <img src="assets/logo.png">
 </p>
@@ -66,8 +63,8 @@ The following lifecycle actions are available:
 
 | Action                                  | Description                                                                        |
 | --------------------------------------- | -----------------------------------------------------------------------------------|
-| create.ps1                              | Sets a (new) email address for the student                                         |
-| update.ps1                              | Updates the email addres of a student.                                             |
+| create.ps1                              | Sets a (new) email address / Username (NieuweLoginNaam) for the student                                         |
+| update.ps1                              | Updates the email addres  / Username (NieuweLoginNaam) of a student.                                             |
 | configuration.json                      | Contains the connection settings and general configuration for the connector.      |
 | fieldMapping.json                       | Defines mappings between person fields and target system person account fields.    |
 

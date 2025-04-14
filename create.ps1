@@ -50,7 +50,7 @@ try {
 
     $outputContext.AccountReference = $actionContext.Data.StamNr
 
-    # process
+    # process upate mailadres
 
     if ($null -ne $actionContext.Data.StudentEmailAddress) {
         $uri = "$($actionContext.Configuration.BaseUrl)/doc?Function=UpdateLeerEMail&Library=ADFuncties&SessionToken=$($actionContext.Configuration.UserName)%3B$($actionContext.Configuration.Password)&StamNr=$($actionContext.Data.StamNr)&EMail=$($ActionContext.Data.StudentEmailAddress)"
@@ -72,6 +72,28 @@ try {
             Write-Information "[DryRun] setting Student Email address to $($ActionContext.Data.StudentEmailAddress), will be executed during enforcement"
         }
     }
+
+    # process update username
+if ($null -ne $actionContext.Data.StudentUserName) {
+    $uri = "$($actionContext.Configuration.BaseUrl)/doc?Function=UpdateGebruiker&Library=ADFuncties&SessionToken=$($actionContext.Configuration.UserName)%3B$($actionContext.Configuration.Password)&LoginNaam=$($actionContext.Data.currentstudentUsername)&NieuweLoginNaam=$($ActionContext.Data.StudentUserName)"
+    $splatUpdateUsernameParams = @{
+        Uri             = $uri
+        Method          = 'POST'
+        UseBasicParsing = $true
+    }
+
+    if (-not($actionContext.DryRun -eq $true)) {
+        Write-Information 'Updating Student Username'
+        $response = Invoke-WebRequest @splatUpdateUsernameParams
+
+        if ($response.statuscode -ne "200") {
+            throw "Error $($response.statuscode) when updating student username $($ActionContext.Data.StudentUserName)"
+        }
+    }
+    else {
+        Write-Information "[DryRun] setting Student Username to $($ActionContext.Data.StudentUserName), will be executed during enforcement"
+    }
+}
 
     $auditLogMessage = "Create student email address for account was successful. AccountReference is: [$($outputContext.AccountReference)]"
     $outputContext.success = $true

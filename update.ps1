@@ -63,24 +63,58 @@ try {
     switch ($action) {
         'UpdateAccount' {
             if ($null -ne $actionContext.Data.StudentEmailAddress) {
-                $uri = "$($actionContext.Configuration.BaseUrl)/doc?Function=UpdateLeerEMail&Library=ADFuncties&SessionToken=$($actionContext.Configuration.UserName)%3B$($actionContext.Configuration.Password)&StamNr=$($actionContext.Data.StamNr)&EMail=$($ActionContext.Data.StudentEmailAddress)"
-                $splatCreateParams = @{
-                    Uri             = $uri
-                    Method          = 'POST'
-                    UseBasicParsing = $true
-                }
+                if ($actionContext.Data.StudentEmailAddress -ne $actionContext.Data.currentStudentEmailAddress) {
+                    $uri = "$($actionContext.Configuration.BaseUrl)/doc?Function=UpdateLeerEMail&Library=ADFuncties&SessionToken=$($actionContext.Configuration.UserName)%3B$($actionContext.Configuration.Password)&StamNr=$($actionContext.Data.StamNr)&EMail=$($ActionContext.Data.StudentEmailAddress)"
+                    $splatCreateParams = @{
+                        Uri             = $uri
+                        Method          = 'POST'
+                        UseBasicParsing = $true
+                    }
 
-                if (-not($actionContext.DryRun -eq $true)) {
-                    Write-Information 'Update Student Email address'
-                    $response = Invoke-WebRequest @splatCreateParams
-                    if ($response.statuscode -ne "200") {
-                        throw "Error $($response.statuscode) when updating Student email address to $($ActionContext.Data.StudentEmailAddress)"
+                    if (-not($actionContext.DryRun -eq $true)) {
+                        Write-Information 'Update Student Email address'
+                        $response = Invoke-WebRequest @splatCreateParams
+                        if ($response.statuscode -ne "200") {
+                            throw "Error $($response.statuscode) when updating Student email address to $($ActionContext.Data.StudentEmailAddress)"
+                        }
+                    }
+                    else {
+                        Write-Information "[DryRun] updating Student email address to $($ActionContext.Data.StudentEmailAddress), will be executed during enforcement"
                     }
                 }
                 else {
-                    Write-Information "[DryRun] updating Student email address to $($ActionContext.Data.StudentEmailAddress), will be executed during enforcement"
+                    Write-Information "Email address is already up to date: $($ActionContext.Data.StudentEmailAddress), skipping update"
                 }
             }
+
+                # process update username
+            if ($null -ne $actionContext.Data.StudentUserName) {
+                if ($actionContext.Data.StudentUserName -ne $actionContext.Data.currentstudentUsername) {
+                    $uri = "$($actionContext.Configuration.BaseUrl)/doc?Function=UpdateGebruiker&Library=ADFuncties&SessionToken=$($actionContext.Configuration.UserName)%3B$($actionContext.Configuration.Password)&LoginNaam=$($actionContext.Data.currentstudentUsername)&NieuweLoginNaam=$($ActionContext.Data.StudentUserName)"
+                    $splatUpdateUsernameParams = @{
+                        Uri             = $uri
+                        Method          = 'POST'
+                        UseBasicParsing = $true
+                    }
+
+                    if (-not($actionContext.DryRun -eq $true)) {
+                        Write-Information 'Updating Student Username'
+                        $response = Invoke-WebRequest @splatUpdateUsernameParams
+
+                        if ($response.statuscode -ne "200") {
+                            throw "Error $($response.statuscode) when updating student username $($ActionContext.Data.StudentUserName)"
+                        }
+                    }
+                    else {
+                        Write-Information "[DryRun] setting Student Username to $($ActionContext.Data.StudentUserName), will be executed during enforcement"
+                    }
+                }
+                else {
+                    Write-Information "Username is already up to date: $($ActionContext.Data.StudentUserName), skipping update"
+                }
+            }
+
+
 
             $auditLogMessage = "Update account was successful. AccountReference is: [$($outputContext.AccountReference)]"
             $outputContext.success = $true
