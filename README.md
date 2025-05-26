@@ -64,7 +64,9 @@ The following lifecycle actions are available:
 | Action                                  | Description                                                                        |
 | --------------------------------------- | -----------------------------------------------------------------------------------|
 | create.ps1                              | Sets a (new) email address / Username (NieuweLoginNaam) for the student                                         |
-| update.ps1                              | Updates the email addres  / Username (NieuweLoginNaam) of a student.                                             |
+| update.ps1                              | Updates the email addres  / Username (NieuweLoginNaam) of a student.  
+| create.ps1                              | Sets a (new) email address / Username (NieuweLoginNaam) for the student                                         |
+| update.ps1                              | Updates the email addres  / Username (NieuweLoginNaam) of a student.                                            |
 | configuration.json                      | Contains the connection settings and general configuration for the connector.      |
 | fieldMapping.json                       | Defines mappings between person fields and target system person account fields.    |
 
