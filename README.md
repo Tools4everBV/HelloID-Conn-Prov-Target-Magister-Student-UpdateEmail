@@ -78,6 +78,19 @@ The field mapping can be imported by using the _fieldMapping.json_ file.
 - The user must be authorized for the function 'UpdateLeerEMail'
 - There are no Get-calls available. The Student accounts that is updated in the create script is the account with the specified StamNr. This StamNr is stored as account reference.
 - It does use an https POST action to invoke a specific library and function in the magister evironment, but the body of the call is not used.
+- currentStudentEmailAddress
+
+      Represents the student's existing email in Magister
+      Used to compare against StudentEmailAddress to determine if an email update is needed
+      Only triggers UpdateLeerEMail API call when values differ
+
+- currentstudentUsername
+
+      Contains the student's current login name in Magister
+      Serves two purposes:
+            As the identifier (LoginNaam) for the account to update
+            For comparison against StudentUserName to check for changes
+      Only executes UpdateGebruiker when a new username is provided
 
 ## Development resources
 

@@ -50,7 +50,7 @@ try {
 
     $outputContext.AccountReference = $actionContext.Data.StamNr
 
-    # process upate mailadres
+    # process update Mail address
 
     if ($null -ne $actionContext.Data.StudentEmailAddress) {
         $uri = "$($actionContext.Configuration.BaseUrl)/doc?Function=UpdateLeerEMail&Library=ADFuncties&SessionToken=$($actionContext.Configuration.UserName)%3B$($actionContext.Configuration.Password)&StamNr=$($actionContext.Data.StamNr)&EMail=$($ActionContext.Data.StudentEmailAddress)"

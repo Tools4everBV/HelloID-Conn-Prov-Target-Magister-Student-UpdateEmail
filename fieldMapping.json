@@ -29,7 +29,7 @@
             "Update"
           ],
           "MappingMode": "Complex",
-          "Value": "\"function getValue() {\\r\\n    return Person.Accounts._2b53ebc9f8034d058f6e84186f19c781.userPrincipalName\\r\\n}\\r\\ngetValue();\"",
+          "Value": "\"function getValue() {\\r\\n    return Person.Accounts.MicrosoftActiveDirectory.userPrincipalName\\r\\n}\\r\\ngetValue();\"",
           "UsedInNotifications": false,
           "StoreInAccountData": false
         }
@@ -63,7 +63,7 @@
             "Update"
           ],
           "MappingMode": "Complex",
-          "Value": "\"function getValue() {\\r\\n    return Person.Accounts._2b53ebc9f8034d058f6e84186f19c781.sAMAccountName\\r\\n}\\r\\ngetValue();\"",
+          "Value": "\"function getValue() {\\r\\n    return Person.Accounts.MicrosoftActiveDirectory.sAMAccountName\\r\\n}\\r\\ngetValue();\"",
           "UsedInNotifications": false,
           "StoreInAccountData": false
         }
