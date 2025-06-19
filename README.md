@@ -3,9 +3,6 @@
 > [!IMPORTANT]
 > This repository contains the connector and configuration code only. The implementer is responsible to acquire the connection details such as username, password, certificate, etc. You might even need to sign a contract or agreement with the supplier before implementing this connector. Please contact the client's application manager to coordinate the connector requirements.
 
-> [!WARNING]
-  This connector is not tested with a Magister environment!
-
 <p align="center">
  <img src="assets/logo.png">
 </p>
@@ -66,8 +63,8 @@ The following lifecycle actions are available:
 
 | Action                                  | Description                                                                        |
 | --------------------------------------- | -----------------------------------------------------------------------------------|
-| create.ps1                              | Sets a (new) email address for the student                                         |
-| update.ps1                              | Updates the email addres of a student.                                             |
+| create.ps1                              | Sets a (new) email address / Username (NieuweLoginNaam) for the student                                         |
+| update.ps1                              | Updates the email addres  / Username (NieuweLoginNaam) of a student.                                            |
 | configuration.json                      | Contains the connection settings and general configuration for the connector.      |
 | fieldMapping.json                       | Defines mappings between person fields and target system person account fields.    |
 
@@ -81,6 +78,19 @@ The field mapping can be imported by using the _fieldMapping.json_ file.
 - The user must be authorized for the function 'UpdateLeerEMail'
 - There are no Get-calls available. The Student accounts that is updated in the create script is the account with the specified StamNr. This StamNr is stored as account reference.
 - It does use an https POST action to invoke a specific library and function in the magister evironment, but the body of the call is not used.
+- currentStudentEmailAddress
+
+      Represents the student's existing email in Magister
+      Used to compare against StudentEmailAddress to determine if an email update is needed
+      Only triggers UpdateLeerEMail API call when values differ
+
+- currentstudentUsername
+
+      Contains the student's current login name in Magister
+      Serves two purposes:
+            As the identifier (LoginNaam) for the account to update
+            For comparison against StudentUserName to check for changes
+      Only executes UpdateGebruiker when a new username is provided
 
 ## Development resources
 
